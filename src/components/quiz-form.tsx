@@ -11,11 +11,11 @@ import PokeBallIcon from '@/components/ui/pokeball-icon';
 import { questions } from '@/data/questions';
 
 export default function QuizForm() {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [error, setError] = useState<string | null>(null);
 
-  const currentQuestion = questions[step];
+  const currentQuestion = questions[step - 1];
   const currentAnswer = answers[step] || [];
   let currentQuestionMaxAnswers: undefined | number = undefined;
   if (currentQuestion.type === 'checkbox' && currentQuestion.max) {
@@ -101,7 +101,7 @@ export default function QuizForm() {
     <form onSubmit={handleSubmit} className="w-full h-full flex flex-col">
       {/* Step indicator */}
       <CardHeader className="flex justify-center mb-2">
-        {`Question ${step + 1} / ${questions.length}`}
+        {`Question ${step} / ${questions.length}`}
       </CardHeader>
 
       {/* Question and input for type text */}
@@ -206,11 +206,11 @@ export default function QuizForm() {
       </div>
 
       <CardFooter className="justify-between mt-4">
-        <Button type="button" onClick={goToPreviousStep} disabled={step === 0}>
+        <Button type="button" onClick={goToPreviousStep} disabled={step === 1}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
         </Button>
-        {step < questions.length - 1 ? (
+        {step < questions.length ? (
           <Button onClick={goToNextStep} variant="default">
             Next <ArrowRight className="h-4 w-4 mr-2" />
           </Button>
