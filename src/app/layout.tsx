@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Poke Matcher',
-  description: 'Find out which Pokemon matches your personality !',
+  title: 'Poké Matcher',
+  description: 'Find out which Pokémon matches your personality !',
 };
 
 export default function RootLayout({
