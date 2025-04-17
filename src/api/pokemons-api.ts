@@ -10,7 +10,7 @@ export type PokemonFromApiType = {
 async function getAllPokemons(): Promise<[]> {
   try {
     const response = await axios.get(
-      'https://pokeapi.co/api/v2/pokemon?limit=151'
+      `${process.env.NEXT_PUBLIC_POKE_API_BASE_URL}/pokemon?limit=151`
     );
     return response.data.results;
   } catch (error) {
@@ -24,7 +24,7 @@ async function getOnePokemon(
 ): Promise<{ types: { type: { name: string } }[] }> {
   try {
     const response = await axios.get(
-      `https://pokeapi.co/api/v2/pokemon/${name}`
+      `${process.env.NEXT_PUBLIC_POKE_API_BASE_URL}/pokemon/${name}`
     );
     return response.data;
   } catch (error) {
@@ -61,7 +61,7 @@ async function getOnePokemon(
 async function getPokemonDescription(name: string): Promise<string> {
   try {
     const response = await axios.get(
-      `https://pokeapi.co/api/v2/pokemon-species/${name}`
+      `${process.env.NEXT_PUBLIC_POKE_API_BASE_URL}/pokemon-species/${name}`
     );
     const description = response.data.flavor_text_entries.find(
       (element: {
@@ -91,8 +91,8 @@ export async function getPokemons(): Promise<PokemonFromApiType[] | null> {
         return {
           name: pokemon.name,
           types: pokemonTypes ?? [],
-          image: `https://img.pokemondb.net/artwork/${pokemon.name}.jpg`,
-          description: pokemonDescription ?? 'No description for this pokemon.',
+          image: `${process.env.NEXT_PUBLIC_POKEMON_IMAGE_BASE_URL}/${pokemon.name}.jpg`,
+          description: pokemonDescription ?? 'No description for this pokémon.',
         };
       }
     );
