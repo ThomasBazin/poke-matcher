@@ -5,9 +5,11 @@ export default function Custom404() {
   return (
     <main className="flex flex-col min-h-screen items-center justify-center gap-8 p-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl text-white font-bold">Page not found...</h2>
+        <h2 className="text-xl text-white font-bold text-shadow-md">
+          Page not found...
+        </h2>
       </div>
-      <Button className="text-xl p-8">
+      <Button className="text-xl p-8 text-shadow-xs">
         <Link href={'/'}>Back to home</Link>
       </Button>
     </main>
