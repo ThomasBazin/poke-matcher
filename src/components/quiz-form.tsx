@@ -1,18 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 
-import { questions } from '@/data/questions';
-import { getPokemons } from '@/api/pokemons-api';
-import { getAIResponse } from '@/api/ai-api';
-import {
-  formatAnswersForPrompt,
-  formatPokemonsForPrompt,
-  generateAIPrompt,
-  parsePokemonFromAiResponse,
-} from '@/utils/prompt-utils';
-
-import QuizResult from './quiz-result';
+import { type QuestionType } from '@/data/questions';
 
 import { CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,30 +11,19 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PokeBallIcon from '@/components/ui/pokeball-icon';
-import { MatchedPokemonType } from '@/types/matched-pokemon';
 
-export default function QuizForm() {
-  const testAnswers = {
-    0: ['yellow'],
-    1: ['steak with fries and ketchup'],
-    2: ['More of an extrovert'],
-    3: ['Thunder', 'Fire'],
-    4: ['Evening'],
-    5: ['Playing guitar and piano'],
-    6: ['I like the seaside'],
-    7: ['Puzzle game'],
-    8: ['Art'],
-    9: ['Keeping everyone in high spirits'],
-  };
-  const [step, setStep] = useState(10);
-  const [answers, setAnswers] = useState<Record<number, string[]>>(testAnswers);
+interface QuizFormPropsInterface {
+  questions: QuestionType[];
+  onSubmit: () => Promise<void>;
+}
+
+export default function QuizForm({
+  questions,
+  onSubmit,
+}: QuizFormPropsInterface) {
+  const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const [isFormCompleted, setIsFormCompleted] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
-
-  const [matchedPokemon, setMatchedPokemon] = useState<
-    MatchedPokemonType | undefined
-  >(undefined);
+  const { answers, setAnswers } = useContext(AnswersContext);
 
   const currentQuestion = questions[step - 1];
   const currentAnswer = answers[step - 1] || [];
@@ -56,8 +35,10 @@ export default function QuizForm() {
 
   const handleTextChange = (value: string) => {
     setError(null);
+    console.log('coucou', value);
     const updatedAnswers = { ...answers };
     updatedAnswers[step] = [value];
+    console.log(updatedAnswers);
     setAnswers(updatedAnswers);
   };
 
@@ -104,37 +85,6 @@ export default function QuizForm() {
     }
   };
 
-  const submitForm = async () => {
-    try {
-      setLoading(true);
-      setIsFormCompleted(true);
-      const formattedAnswers = formatAnswersForPrompt({ questions, answers });
-
-      const pokemons = await getPokemons();
-
-      if (!pokemons) {
-        return setError('An error occured, please try again later.');
-      }
-
-      const prompt = generateAIPrompt({
-        userAnswers: formattedAnswers,
-        pokemonsInfos: formatPokemonsForPrompt(pokemons),
-      });
-
-      const aiResponse = await getAIResponse(prompt);
-      if (!aiResponse) {
-        return setError('An error occured, please try again later.');
-      }
-      const parsedPokemon = parsePokemonFromAiResponse(aiResponse);
-      setMatchedPokemon(parsedPokemon);
-    } catch (error) {
-      console.error(error);
-      setError('An error occured, please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const goToPreviousStep = () => {
     setError(null);
     setStep(step - 1);
@@ -150,15 +100,11 @@ export default function QuizForm() {
     if (step < questions.length) {
       setStep(step + 1);
     } else {
-      submitForm();
+      onSubmit();
     }
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  return !isFormCompleted ? (
+  return (
     <form onSubmit={goToNextStep} className="w-full h-full flex flex-col">
       {/* Step indicator */}
       <CardHeader className="flex justify-center mb-2">
@@ -282,9 +228,5 @@ export default function QuizForm() {
         )}
       </CardFooter>
     </form>
-  ) : matchedPokemon ? (
-    <QuizResult matchedPokemon={matchedPokemon}></QuizResult>
-  ) : (
-    <p>Error</p>
   );
 }

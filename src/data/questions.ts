@@ -1,5 +1,5 @@
 // Type de question
-export type Question =
+export type QuestionType =
   | {
       type: 'text';
       label: string;
@@ -16,7 +16,7 @@ export type Question =
       max?: number;
     };
 
-export const questions: Question[] = [
+export const questions: QuestionType[] = [
   {
     type: 'text',
     label: "What's your favourite colour ?",
