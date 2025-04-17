@@ -1,6 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+
+import { questions } from '@/data/questions';
+import { getPokemons } from '@/api/pokemons-api';
+import { getAIResponse } from '@/api/ai-api';
+import {
+  formatAnswersForPrompt,
+  formatPokemonsForPrompt,
+  generateAIPrompt,
+  parsePokemonFromAiResponse,
+} from '@/utils/prompt-utils';
+
+import QuizResult from './quiz-result';
+
 import { CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,15 +21,34 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PokeBallIcon from '@/components/ui/pokeball-icon';
-import { questions } from '@/data/questions';
+import { MatchedPokemonType } from '@/types/matched-pokemon';
 
 export default function QuizForm() {
-  const [step, setStep] = useState(1);
-  const [answers, setAnswers] = useState<Record<number, string[]>>({});
+  const testAnswers = {
+    0: ['yellow'],
+    1: ['steak with fries and ketchup'],
+    2: ['More of an extrovert'],
+    3: ['Thunder', 'Fire'],
+    4: ['Evening'],
+    5: ['Playing guitar and piano'],
+    6: ['I like the seaside'],
+    7: ['Puzzle game'],
+    8: ['Art'],
+    9: ['Keeping everyone in high spirits'],
+  };
+  const [step, setStep] = useState(10);
+  const [answers, setAnswers] = useState<Record<number, string[]>>(testAnswers);
   const [error, setError] = useState<string | null>(null);
+  const [isFormCompleted, setIsFormCompleted] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+
+  const [matchedPokemon, setMatchedPokemon] = useState<
+    MatchedPokemonType | undefined
+  >(undefined);
 
   const currentQuestion = questions[step - 1];
-  const currentAnswer = answers[step] || [];
+  const currentAnswer = answers[step - 1] || [];
+
   let currentQuestionMaxAnswers: undefined | number = undefined;
   if (currentQuestion.type === 'checkbox' && currentQuestion.max) {
     currentQuestionMaxAnswers = currentQuestion.max;
@@ -40,13 +72,11 @@ export default function QuizForm() {
     if (currentQuestionMaxAnswers) {
       const alreadyChecked = currentAnswer.includes(value);
 
-      let updatedAnswer: string[];
+      let updatedAnswer = [...currentAnswer];
       if (alreadyChecked) {
         updatedAnswer = currentAnswer.filter((answer) => answer !== value);
-      } else if (currentAnswer.length < currentQuestionMaxAnswers) {
-        updatedAnswer = [...currentAnswer, value];
       } else {
-        updatedAnswer = currentAnswer;
+        updatedAnswer = [...currentAnswer, value];
       }
 
       setError(null);
@@ -59,7 +89,6 @@ export default function QuizForm() {
       case 'text':
         return currentAnswer.length === 1 && currentAnswer[0].trim().length > 0;
       case 'radio':
-        console.log(currentAnswer);
         return currentAnswer.length === 1;
       case 'checkbox':
         if (currentQuestionMaxAnswers) {
@@ -75,30 +104,62 @@ export default function QuizForm() {
     }
   };
 
+  const submitForm = async () => {
+    try {
+      setLoading(true);
+      setIsFormCompleted(true);
+      const formattedAnswers = formatAnswersForPrompt({ questions, answers });
+
+      const pokemons = await getPokemons();
+
+      if (!pokemons) {
+        return setError('An error occured, please try again later.');
+      }
+
+      const prompt = generateAIPrompt({
+        userAnswers: formattedAnswers,
+        pokemonsInfos: formatPokemonsForPrompt(pokemons),
+      });
+
+      const aiResponse = await getAIResponse(prompt);
+      if (!aiResponse) {
+        return setError('An error occured, please try again later.');
+      }
+      const parsedPokemon = parsePokemonFromAiResponse(aiResponse);
+      setMatchedPokemon(parsedPokemon);
+    } catch (error) {
+      console.error(error);
+      setError('An error occured, please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const goToPreviousStep = () => {
     setError(null);
     setStep(step - 1);
   };
 
-  const goToNextStep = () => {
+  const goToNextStep = async (event: { preventDefault: () => void }) => {
+    event.preventDefault();
     if (!isCurrentAnswerValid()) {
       setError('Please complete this step before continuing.');
       return;
     }
     setError(null);
-    if (step < questions.length - 1) {
+    if (step < questions.length) {
       setStep(step + 1);
     } else {
-      console.log('Answers:', answers);
+      submitForm();
     }
   };
 
-  const handleSubmit = (event: { preventDefault: () => void }) => {
-    event.preventDefault();
-  };
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
-  return (
-    <form onSubmit={handleSubmit} className="w-full h-full flex flex-col">
+  return !isFormCompleted ? (
+    <form onSubmit={goToNextStep} className="w-full h-full flex flex-col">
       {/* Step indicator */}
       <CardHeader className="flex justify-center mb-2">
         {`Question ${step} / ${questions.length}`}
@@ -221,5 +282,9 @@ export default function QuizForm() {
         )}
       </CardFooter>
     </form>
+  ) : matchedPokemon ? (
+    <QuizResult matchedPokemon={matchedPokemon}></QuizResult>
+  ) : (
+    <p>Error</p>
   );
 }
