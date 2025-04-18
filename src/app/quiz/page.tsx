@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { questions } from '@/data/questions';
 
@@ -27,9 +27,7 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
-  const [matchedPokemon, setMatchedPokemon] = useState<
-    MatchedPokemonType | undefined
-  >(undefined);
+  const matchedPokemon = useRef<MatchedPokemonType | undefined>(undefined);
 
   const questionsData = questions;
 
@@ -55,8 +53,7 @@ export default function QuizPage() {
         return setError('An error occured, please try again later.');
       }
       const parsedPokemon = parsePokemonFromAiResponse(aiResponse);
-      console.log('airesponse', parsedPokemon);
-      setMatchedPokemon(parsedPokemon);
+      matchedPokemon.current = parsedPokemon;
     } catch (error) {
       console.error(error);
       setError('An error occured, please try again later.');
@@ -73,6 +70,8 @@ export default function QuizPage() {
   return !isFormSubmitted ? (
     <QuizForm questions={questionsData} onSubmit={submitForm}></QuizForm>
   ) : (
-    matchedPokemon && <QuizResult matchedPokemon={matchedPokemon}></QuizResult>
+    matchedPokemon.current && (
+      <QuizResult matchedPokemon={matchedPokemon.current}></QuizResult>
+    )
   );
 }

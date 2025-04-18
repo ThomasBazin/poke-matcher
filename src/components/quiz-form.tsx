@@ -4,11 +4,10 @@ import { useState } from 'react';
 
 import { type QuestionType } from '@/types/question';
 
+import Question from '@/components/question';
+
 import { CardFooter, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PokeBallIcon from '@/components/ui/pokeball-icon';
 
@@ -28,37 +27,9 @@ export default function QuizForm({
   const currentQuestion = questions[step - 1];
   const currentAnswer = answers[step] || [];
 
-  let currentQuestionMaxAnswers: undefined | number = undefined;
-  if (currentQuestion.type === 'checkbox' && currentQuestion.max) {
-    currentQuestionMaxAnswers = currentQuestion.max;
-  }
-
-  const handleTextChange = (value: string) => {
+  const handleAnswerChange = (answer: string[]) => {
     setError(null);
-    const updatedAnswers = { ...answers };
-    updatedAnswers[step] = [value];
-    setAnswers(updatedAnswers);
-  };
-
-  const handleRadioChange = (value: string) => {
-    setError(null);
-    const updatedAnswers = { ...answers };
-    updatedAnswers[step] = [value];
-    setAnswers(updatedAnswers);
-  };
-
-  const handleCheckboxToggle = (value: string) => {
-    const alreadyChecked = currentAnswer.includes(value);
-
-    let updatedAnswer = [...currentAnswer];
-    if (alreadyChecked) {
-      updatedAnswer = currentAnswer.filter((answer) => answer !== value);
-    } else {
-      updatedAnswer = [...currentAnswer, value];
-    }
-
-    setError(null);
-    setAnswers({ ...answers, [step]: updatedAnswer });
+    setAnswers({ ...answers, [step]: answer });
   };
 
   const isCurrentAnswerValid = (): boolean => {
@@ -68,10 +39,10 @@ export default function QuizForm({
       case 'radio':
         return currentAnswer.length === 1;
       case 'checkbox':
-        if (currentQuestionMaxAnswers) {
+        if (currentQuestion.max) {
           return (
             currentAnswer.length > 0 &&
-            currentAnswer.length <= currentQuestionMaxAnswers
+            currentAnswer.length <= currentQuestion.max
           );
         }
         return currentAnswer.length > 0;
@@ -96,113 +67,23 @@ export default function QuizForm({
     if (step < questions.length) {
       setStep(step + 1);
     } else {
+      console.log(answers);
       onSubmit(answers);
     }
   };
 
   return (
     <form onSubmit={goToNextStep} className="w-full h-full flex flex-col">
-      {/* Step indicator */}
       <CardHeader className="flex justify-center mb-2">
         {`Question ${step} / ${questions.length}`}
       </CardHeader>
 
-      {/* Question and input for type text */}
-      {currentQuestion.type === 'text' && (
-        <div className="flex-1">
-          <div>
-            <h2
-              id="question-label"
-              className="block text-xl font-semibold mb-4 md:mb-8 text-pretty"
-            >
-              {currentQuestion.label}
-            </h2>
-          </div>
+      <Question
+        question={currentQuestion}
+        answer={currentAnswer}
+        onChangeValue={handleAnswerChange}
+      ></Question>
 
-          <div>
-            <Input
-              id="text-response-input"
-              type="text"
-              value={(currentAnswer.length && currentAnswer[0]) || ''}
-              onChange={(e) => handleTextChange(e.target.value)}
-              className="mb-6"
-              aria-labelledby="question-label"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Question and inputs for type radio */}
-      {currentQuestion.type === 'radio' && (
-        <>
-          <div className="flex-1 overflow-y-auto">
-            <fieldset>
-              <legend className="block text-xl font-semibold mb-4 md:mb-8">
-                {currentQuestion.label}
-              </legend>
-              <RadioGroup
-                value={(currentAnswer.length && currentAnswer[0]) || ''}
-                onValueChange={handleRadioChange}
-                className="gap-y-5 mb-6"
-              >
-                {currentQuestion.options.map((option) => (
-                  <div key={option} className="flex items-center gap-2">
-                    <RadioGroupItem value={option} id={option} />
-                    <label htmlFor={option} className="text-sm font-medium">
-                      {option}
-                    </label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </fieldset>
-          </div>
-        </>
-      )}
-
-      {/* Question and inputs for type checkbox */}
-      {currentQuestion.type === 'checkbox' && (
-        <>
-          <div className="flex-1">
-            <fieldset>
-              <legend className="block text-xl font-semibold mb-4 text-pretty">
-                {currentQuestion.label}
-              </legend>
-              <div className="flex flex-col gap-1.5 mb-3">
-                {currentQuestionMaxAnswers && (
-                  <p className="text-xs text-red-500 mt-1">
-                    Select up to {currentQuestionMaxAnswers}
-                  </p>
-                )}
-                {currentQuestion.options.map((option) => {
-                  const selected = currentAnswer || [];
-
-                  const isOptionDisabled = () => {
-                    if (!currentQuestion.max) return false;
-                    return (
-                      !selected.includes(option) &&
-                      currentQuestion.max <= selected.length
-                    );
-                  };
-
-                  return (
-                    <div key={option} className="flex items-center gap-2">
-                      <Checkbox
-                        id={option}
-                        checked={selected.includes(option)}
-                        onCheckedChange={() => handleCheckboxToggle(option)}
-                        disabled={isOptionDisabled()}
-                      />
-                      <label htmlFor={option} className="text-sm font-medium">
-                        {option}
-                      </label>
-                    </div>
-                  );
-                })}
-              </div>
-            </fieldset>
-          </div>
-        </>
-      )}
       <div className="h-6 mt-1">
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
