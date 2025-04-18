@@ -2,7 +2,7 @@ services:
   nextjs:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.nextjs-app
     env_file:
       - .env
     ports:
@@ -13,12 +13,13 @@ services:
       - NODE_ENV=production
 
   ollama:
-    image: ollama/ollama
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
     ports:
       - '11434:11434'
     volumes:
       - ollama-models:/root/.ollama
-    command: serve
 
 volumes:
   ollama-models:
