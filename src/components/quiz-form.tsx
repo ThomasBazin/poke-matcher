@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { type QuestionType } from '@/data/questions';
+import { type QuestionType } from '@/types/question';
 
 import { CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

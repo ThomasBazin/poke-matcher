@@ -1,27 +1,30 @@
 'use client';
 
+import { useState } from 'react';
+
+import { questions } from '@/data/questions';
+
+import { type MatchedPokemonType } from '@/types/matched-pokemon';
+import { type AnswersType } from '@/types/answers';
+
 import QuizForm from '@/components/quiz-form';
 import QuizResult from '@/components/quiz-result';
 import ErrorMessage from '@/components/error-message';
 import Loader from '@/components/loader';
 
-import { useState } from 'react';
-import { questions } from '@/data/questions';
+import { getPokemons } from '@/api/pokemons-api';
+import { getAIResponse } from '@/api/ai-api';
+
 import {
   formatAnswersForPrompt,
   formatPokemonsForPrompt,
   generateAIPrompt,
   parsePokemonFromAiResponse,
 } from '@/utils/prompt-utils';
-import { getPokemons } from '@/api/pokemons-api';
-import { getAIResponse } from '@/api/ai-api';
-import { MatchedPokemonType } from '@/types/matched-pokemon';
-
-type AnswerType = Record<number, string[]>;
 
 export default function QuizPage() {
   const [error, setError] = useState<string | null>(null);
-  const [globalAnswers, setGlobalAnswers] = useState<AnswerType | null>(null);
+  const [globalAnswers, setGlobalAnswers] = useState<AnswersType | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [matchedPokemon, setMatchedPokemon] = useState<
@@ -30,7 +33,7 @@ export default function QuizPage() {
 
   const questionsData = questions;
 
-  const submitForm = async (answers: AnswerType) => {
+  const submitForm = async (answers: AnswersType) => {
     try {
       setLoading(true);
       setGlobalAnswers(answers);

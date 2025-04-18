@@ -1,4 +1,4 @@
-import { QuestionType } from '@/data/questions';
+import { type QuestionType } from '@/types/question';
 import { PokemonFromApiType } from '@/api/pokemons-api';
 import { type MatchedPokemonType } from '@/types/matched-pokemon';
 
