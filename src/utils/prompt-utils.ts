@@ -11,10 +11,9 @@ export function formatAnswersForPrompt({
 }): string {
   const questionsPlusAnswers = questions.map((question, index) => {
     return `Question ${index + 1} : ${question.label}\nAnswer: ${answers[
-      index
+      index + 1
     ].join(', ')}`;
   });
-
   return questionsPlusAnswers.join('\n\n');
 }
 
