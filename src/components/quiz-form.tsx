@@ -14,7 +14,7 @@ import PokeBallIcon from '@/components/ui/pokeball-icon';
 
 interface QuizFormPropsInterface {
   questions: QuestionType[];
-  onSubmit: () => Promise<void>;
+  onSubmit: (answers: Record<number, string[]>) => Promise<void>;
 }
 
 export default function QuizForm({
@@ -26,7 +26,7 @@ export default function QuizForm({
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
 
   const currentQuestion = questions[step - 1];
-  const currentAnswer = answers[step - 1] || [];
+  const currentAnswer = answers[step] || [];
 
   let currentQuestionMaxAnswers: undefined | number = undefined;
   if (currentQuestion.type === 'checkbox' && currentQuestion.max) {
@@ -35,10 +35,8 @@ export default function QuizForm({
 
   const handleTextChange = (value: string) => {
     setError(null);
-    console.log('coucou', value);
     const updatedAnswers = { ...answers };
     updatedAnswers[step] = [value];
-    console.log(updatedAnswers);
     setAnswers(updatedAnswers);
   };
 
@@ -50,19 +48,17 @@ export default function QuizForm({
   };
 
   const handleCheckboxToggle = (value: string) => {
-    if (currentQuestionMaxAnswers) {
-      const alreadyChecked = currentAnswer.includes(value);
+    const alreadyChecked = currentAnswer.includes(value);
 
-      let updatedAnswer = [...currentAnswer];
-      if (alreadyChecked) {
-        updatedAnswer = currentAnswer.filter((answer) => answer !== value);
-      } else {
-        updatedAnswer = [...currentAnswer, value];
-      }
-
-      setError(null);
-      setAnswers({ ...answers, [step]: updatedAnswer });
+    let updatedAnswer = [...currentAnswer];
+    if (alreadyChecked) {
+      updatedAnswer = currentAnswer.filter((answer) => answer !== value);
+    } else {
+      updatedAnswer = [...currentAnswer, value];
     }
+
+    setError(null);
+    setAnswers({ ...answers, [step]: updatedAnswer });
   };
 
   const isCurrentAnswerValid = (): boolean => {
@@ -100,7 +96,7 @@ export default function QuizForm({
     if (step < questions.length) {
       setStep(step + 1);
     } else {
-      onSubmit();
+      onSubmit(answers);
     }
   };
 
@@ -180,14 +176,13 @@ export default function QuizForm({
                 {currentQuestion.options.map((option) => {
                   const selected = currentAnswer || [];
 
-                  const processDisabled = () => {
+                  const isOptionDisabled = () => {
                     if (!currentQuestion.max) return false;
                     return (
                       !selected.includes(option) &&
                       currentQuestion.max <= selected.length
                     );
                   };
-                  const disabled = processDisabled();
 
                   return (
                     <div key={option} className="flex items-center gap-2">
@@ -195,7 +190,7 @@ export default function QuizForm({
                         id={option}
                         checked={selected.includes(option)}
                         onCheckedChange={() => handleCheckboxToggle(option)}
-                        disabled={disabled}
+                        disabled={isOptionDisabled()}
                       />
                       <label htmlFor={option} className="text-sm font-medium">
                         {option}

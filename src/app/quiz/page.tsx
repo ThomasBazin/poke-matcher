@@ -2,6 +2,9 @@
 
 import QuizForm from '@/components/quiz-form';
 import QuizResult from '@/components/quiz-result';
+import ErrorMessage from '@/components/error-message';
+import Loader from '@/components/loader';
+
 import { useState } from 'react';
 import { questions } from '@/data/questions';
 import {
@@ -18,7 +21,7 @@ type AnswerType = Record<number, string[]>;
 
 export default function QuizPage() {
   const [error, setError] = useState<string | null>(null);
-  const [isFormCompleted, setIsFormCompleted] = useState<boolean>(false);
+  const [globalAnswers, setGlobalAnswers] = useState<AnswerType | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [matchedPokemon, setMatchedPokemon] = useState<
@@ -27,10 +30,10 @@ export default function QuizPage() {
 
   const questionsData = questions;
 
-  const submitForm = async () => {
+  const submitForm = async (answers: AnswerType) => {
     try {
       setLoading(true);
-      setIsFormCompleted(true);
+      setGlobalAnswers(answers);
       const formattedAnswers = formatAnswersForPrompt({ questions, answers });
 
       const pokemons = await getPokemons();
@@ -49,6 +52,7 @@ export default function QuizPage() {
         return setError('An error occured, please try again later.');
       }
       const parsedPokemon = parsePokemonFromAiResponse(aiResponse);
+      console.log('airesponse', parsedPokemon);
       setMatchedPokemon(parsedPokemon);
     } catch (error) {
       console.error(error);
@@ -58,17 +62,12 @@ export default function QuizPage() {
     }
   };
 
-  if (error) return <p>Error</p>;
+  if (error) return <ErrorMessage message={error}></ErrorMessage>;
 
   if (loading)
-    return (
-      <>
-        <p>Loading...</p>
-        <p>This might take a few minutes</p>
-      </>
-    );
+    return <Loader message="This might take a few minutes."></Loader>;
 
-  return !isFormCompleted ? (
+  return !globalAnswers ? (
     <QuizForm questions={questionsData} onSubmit={submitForm}></QuizForm>
   ) : (
     matchedPokemon && <QuizResult matchedPokemon={matchedPokemon}></QuizResult>
