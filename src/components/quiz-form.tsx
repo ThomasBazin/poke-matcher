@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 
 import { type QuestionType } from '@/data/questions';
 
@@ -23,7 +23,7 @@ export default function QuizForm({
 }: QuizFormPropsInterface) {
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const { answers, setAnswers } = useContext(AnswersContext);
+  const [answers, setAnswers] = useState<Record<number, string[]>>({});
 
   const currentQuestion = questions[step - 1];
   const currentAnswer = answers[step - 1] || [];

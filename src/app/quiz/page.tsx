@@ -13,7 +13,8 @@ import {
 import { getPokemons } from '@/api/pokemons-api';
 import { getAIResponse } from '@/api/ai-api';
 import { MatchedPokemonType } from '@/types/matched-pokemon';
-import { useAnswers } from '@/context/answers-context';
+
+type AnswerType = Record<number, string[]>;
 
 export default function QuizPage() {
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +24,6 @@ export default function QuizPage() {
   const [matchedPokemon, setMatchedPokemon] = useState<
     MatchedPokemonType | undefined
   >(undefined);
-
-  const { answers } = useAnswers();
 
   const questionsData = questions;
 
