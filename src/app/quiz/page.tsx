@@ -24,8 +24,8 @@ import {
 
 export default function QuizPage() {
   const [error, setError] = useState<string | null>(null);
-  const [globalAnswers, setGlobalAnswers] = useState<AnswersType | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   const [matchedPokemon, setMatchedPokemon] = useState<
     MatchedPokemonType | undefined
@@ -36,7 +36,7 @@ export default function QuizPage() {
   const submitForm = async (answers: AnswersType) => {
     try {
       setLoading(true);
-      setGlobalAnswers(answers);
+      setIsFormSubmitted(true);
       const formattedAnswers = formatAnswersForPrompt({ questions, answers });
 
       const pokemons = await getPokemons();
@@ -70,7 +70,7 @@ export default function QuizPage() {
   if (loading)
     return <Loader message="This might take a few minutes."></Loader>;
 
-  return !globalAnswers ? (
+  return !isFormSubmitted ? (
     <QuizForm questions={questionsData} onSubmit={submitForm}></QuizForm>
   ) : (
     matchedPokemon && <QuizResult matchedPokemon={matchedPokemon}></QuizResult>
