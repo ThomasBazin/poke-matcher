@@ -24,20 +24,8 @@ import PokeBallIcon from '@/components/ui/pokeball-icon';
 import { MatchedPokemonType } from '@/types/matched-pokemon';
 
 export default function QuizForm() {
-  const testAnswers = {
-    0: ['yellow'],
-    1: ['steak with fries and ketchup'],
-    2: ['More of an extrovert'],
-    3: ['Thunder', 'Fire'],
-    4: ['Evening'],
-    5: ['Playing guitar and piano'],
-    6: ['I like the seaside'],
-    7: ['Puzzle game'],
-    8: ['Art'],
-    9: ['Keeping everyone in high spirits'],
-  };
-  const [step, setStep] = useState(10);
-  const [answers, setAnswers] = useState<Record<number, string[]>>(testAnswers);
+  const [step, setStep] = useState(1);
+  const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [isFormCompleted, setIsFormCompleted] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
@@ -47,7 +35,7 @@ export default function QuizForm() {
   >(undefined);
 
   const currentQuestion = questions[step - 1];
-  const currentAnswer = answers[step - 1] || [];
+  const currentAnswer = answers[step] || [];
 
   let currentQuestionMaxAnswers: undefined | number = undefined;
   if (currentQuestion.type === 'checkbox' && currentQuestion.max) {
