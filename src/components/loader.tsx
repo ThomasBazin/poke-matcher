@@ -2,7 +2,7 @@ export default function Loader({ message }: { message: string }) {
   return (
     <div className="min-h-full flex flex-col items-center justify-center">
       <div>
-        <h2 className="text-md font-bold text-center">Loading...</h2>
+        <h1 className="text-md font-bold text-center">Loading...</h1>
         <p>{message}</p>
       </div>
       <div className="grid min-h-[140px] w-full place-items-center overflow-x-scroll rounded-lg p-6 lg:overflow-visible">

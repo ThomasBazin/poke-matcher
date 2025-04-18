@@ -75,7 +75,7 @@ export default function QuizForm({
   return (
     <form onSubmit={goToNextStep} className="w-full h-full flex flex-col">
       <CardHeader className="flex justify-center mb-2">
-        {`Question ${step} / ${questions.length}`}
+        <h1>{`Question ${step} / ${questions.length}`}</h1>
       </CardHeader>
 
       <Question

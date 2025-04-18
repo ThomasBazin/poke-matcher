@@ -4,11 +4,11 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen items-center justify-center gap-8 p-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-xl text-white font-bold text-shadow-md">
+      <div className="flex flex-col gap-2 items-center">
+        <h1 className="text-xl text-white font-bold text-shadow-md">
           Welcome to Poke Matcher !
-        </h2>
-        <p className="font-semibold text-muted text-shadow-xs">
+        </h1>
+        <p className="font-semibold text-muted text-shadow-xs text-center">
           Let&apos;s discover the Pokémon that matches your personality.
         </p>
       </div>
