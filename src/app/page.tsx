@@ -12,10 +12,11 @@ export default function Home() {
           Let&apos;s discover the Pokémon that matches your personality.
         </p>
       </div>
-
-      <Button className="text-2xl p-8 shadow-2xl text-shadow-xs">
-        <Link href={'/quiz'}>Take the quiz !</Link>
-      </Button>
+      <Link href={'/quiz'}>
+        <Button className="text-2xl p-8 shadow-2xl text-shadow-xs cursor-pointer">
+          Take the quiz !
+        </Button>
+      </Link>
     </main>
   );
 }

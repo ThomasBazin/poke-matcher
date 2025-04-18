@@ -1,13 +1,16 @@
+import { type MatchedPokemonType } from '@/types/matched-pokemon';
+
 import ImageWithFallback from '@/components/ui/image-with-fallback';
 import { Button } from '@/components/ui/button';
-import { type MatchedPokemonType } from '@/types/matched-pokemon';
+
 import { capitalizeFirstLetter } from '@/utils/basic-utils';
 
+interface QuizResultPropsInterface {
+  matchedPokemon: MatchedPokemonType;
+}
 export default function QuizResult({
   matchedPokemon,
-}: {
-  matchedPokemon: MatchedPokemonType;
-}) {
+}: QuizResultPropsInterface) {
   return (
     <div className="h-full flex flex-col gap-4 items-center">
       <h2 className="text-lg font-semibold ">Your Pokémon is :</h2>

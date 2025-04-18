@@ -2,17 +2,7 @@
 
 import { useState } from 'react';
 
-import { questions } from '@/data/questions';
-import { getPokemons } from '@/api/pokemons-api';
-import { getAIResponse } from '@/api/ai-api';
-import {
-  formatAnswersForPrompt,
-  formatPokemonsForPrompt,
-  generateAIPrompt,
-  parsePokemonFromAiResponse,
-} from '@/utils/prompt-utils';
-
-import QuizResult from './quiz-result';
+import { type QuestionType } from '@/types/question';
 
 import { CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,18 +11,19 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PokeBallIcon from '@/components/ui/pokeball-icon';
-import { MatchedPokemonType } from '@/types/matched-pokemon';
 
-export default function QuizForm() {
+interface QuizFormPropsInterface {
+  questions: QuestionType[];
+  onSubmit: (answers: Record<number, string[]>) => Promise<void>;
+}
+
+export default function QuizForm({
+  questions,
+  onSubmit,
+}: QuizFormPropsInterface) {
   const [step, setStep] = useState(1);
-  const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [error, setError] = useState<string | null>(null);
-  const [isFormCompleted, setIsFormCompleted] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
-
-  const [matchedPokemon, setMatchedPokemon] = useState<
-    MatchedPokemonType | undefined
-  >(undefined);
+  const [answers, setAnswers] = useState<Record<number, string[]>>({});
 
   const currentQuestion = questions[step - 1];
   const currentAnswer = answers[step] || [];
@@ -57,19 +48,17 @@ export default function QuizForm() {
   };
 
   const handleCheckboxToggle = (value: string) => {
-    if (currentQuestionMaxAnswers) {
-      const alreadyChecked = currentAnswer.includes(value);
+    const alreadyChecked = currentAnswer.includes(value);
 
-      let updatedAnswer = [...currentAnswer];
-      if (alreadyChecked) {
-        updatedAnswer = currentAnswer.filter((answer) => answer !== value);
-      } else {
-        updatedAnswer = [...currentAnswer, value];
-      }
-
-      setError(null);
-      setAnswers({ ...answers, [step]: updatedAnswer });
+    let updatedAnswer = [...currentAnswer];
+    if (alreadyChecked) {
+      updatedAnswer = currentAnswer.filter((answer) => answer !== value);
+    } else {
+      updatedAnswer = [...currentAnswer, value];
     }
+
+    setError(null);
+    setAnswers({ ...answers, [step]: updatedAnswer });
   };
 
   const isCurrentAnswerValid = (): boolean => {
@@ -92,37 +81,6 @@ export default function QuizForm() {
     }
   };
 
-  const submitForm = async () => {
-    try {
-      setLoading(true);
-      setIsFormCompleted(true);
-      const formattedAnswers = formatAnswersForPrompt({ questions, answers });
-
-      const pokemons = await getPokemons();
-
-      if (!pokemons) {
-        return setError('An error occured, please try again later.');
-      }
-
-      const prompt = generateAIPrompt({
-        userAnswers: formattedAnswers,
-        pokemonsInfos: formatPokemonsForPrompt(pokemons),
-      });
-
-      const aiResponse = await getAIResponse(prompt);
-      if (!aiResponse) {
-        return setError('An error occured, please try again later.');
-      }
-      const parsedPokemon = parsePokemonFromAiResponse(aiResponse);
-      setMatchedPokemon(parsedPokemon);
-    } catch (error) {
-      console.error(error);
-      setError('An error occured, please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const goToPreviousStep = () => {
     setError(null);
     setStep(step - 1);
@@ -138,15 +96,11 @@ export default function QuizForm() {
     if (step < questions.length) {
       setStep(step + 1);
     } else {
-      submitForm();
+      onSubmit(answers);
     }
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  return !isFormCompleted ? (
+  return (
     <form onSubmit={goToNextStep} className="w-full h-full flex flex-col">
       {/* Step indicator */}
       <CardHeader className="flex justify-center mb-2">
@@ -222,14 +176,13 @@ export default function QuizForm() {
                 {currentQuestion.options.map((option) => {
                   const selected = currentAnswer || [];
 
-                  const processDisabled = () => {
+                  const isOptionDisabled = () => {
                     if (!currentQuestion.max) return false;
                     return (
                       !selected.includes(option) &&
                       currentQuestion.max <= selected.length
                     );
                   };
-                  const disabled = processDisabled();
 
                   return (
                     <div key={option} className="flex items-center gap-2">
@@ -237,7 +190,7 @@ export default function QuizForm() {
                         id={option}
                         checked={selected.includes(option)}
                         onCheckedChange={() => handleCheckboxToggle(option)}
-                        disabled={disabled}
+                        disabled={isOptionDisabled()}
                       />
                       <label htmlFor={option} className="text-sm font-medium">
                         {option}
@@ -270,9 +223,5 @@ export default function QuizForm() {
         )}
       </CardFooter>
     </form>
-  ) : matchedPokemon ? (
-    <QuizResult matchedPokemon={matchedPokemon}></QuizResult>
-  ) : (
-    <p>Error</p>
   );
 }
