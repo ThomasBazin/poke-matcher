@@ -28,7 +28,10 @@ export default function QuizResult({
         <p className="px-4 text-muted-foreground text-sm text-pretty">
           {matchedPokemon.justification}
         </p>
-        <Button onClick={() => location.reload()} className="cursor-pointer">
+        <Button
+          onClick={() => location.assign('/quiz')}
+          className="cursor-pointer"
+        >
           Play again
         </Button>
       </div>

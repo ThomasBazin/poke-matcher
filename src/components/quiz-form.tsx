@@ -107,6 +107,7 @@ export default function QuizForm({
           <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
         </Button>
+
         {quizState.step < questions.length ? (
           <Button
             onClick={goToNextStep}
