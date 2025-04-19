@@ -20,7 +20,7 @@ export async function submitForm(answers: AnswersType) {
     const pokemons = await getPokemons();
 
     if (!pokemons) {
-      throw new Error('An error occured, please try again later.');
+      throw new Error('Error while fetching pokemons');
     }
 
     const prompt = generateAIPrompt({
@@ -30,11 +30,11 @@ export async function submitForm(answers: AnswersType) {
 
     const aiResponse = await getAIResponse(prompt);
     if (!aiResponse) {
-      throw new Error('An error occured, please try again later.');
+      throw new Error('AI agent is not responding');
     }
     const parsedPokemon = parsePokemonFromAiResponse(aiResponse);
     if (!parsedPokemon) {
-      throw new Error('An error occured, please try again later.');
+      throw new Error('Error while parsing pokemons');
     }
     return parsedPokemon;
   } catch (error) {
