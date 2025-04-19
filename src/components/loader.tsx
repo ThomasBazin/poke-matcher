@@ -5,7 +5,7 @@ export default function Loader({ message }: { message: string }) {
         <h1 className="text-md font-bold text-center">Loading...</h1>
         <p>{message}</p>
       </div>
-      <div className="grid min-h-[140px] w-full place-items-center overflow-x-scroll rounded-lg p-6 lg:overflow-visible">
+      <div className="grid min-h-[140px] w-full place-items-center rounded-lg p-6 lg:overflow-visible">
         <svg
           className="text-primary animate-spin"
           viewBox="0 0 64 64"
