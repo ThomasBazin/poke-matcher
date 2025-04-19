@@ -9,9 +9,11 @@ export default function Custom404() {
           Page not found...
         </h2>
       </div>
-      <Button className="text-xl p-8 text-shadow-xs">
-        <Link href={'/'}>Back to home</Link>
-      </Button>
+      <Link href={'/'}>
+        <Button className="text-xl p-8 text-shadow-xs cursor-pointer">
+          Back to home
+        </Button>
+      </Link>
     </main>
   );
 }

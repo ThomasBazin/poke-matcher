@@ -1,4 +1,4 @@
-import { QuestionType } from '@/data/questions';
+import { type QuestionType } from '@/types/question';
 import { PokemonFromApiType } from '@/api/pokemons-api';
 import { type MatchedPokemonType } from '@/types/matched-pokemon';
 
@@ -12,9 +12,8 @@ export function formatAnswersForPrompt({
   const questionsPlusAnswers = questions.map((question, index) => {
     return `Question ${index + 1} : ${question.label}\nAnswer: ${answers[
       index + 1
-    ].join(', ')}`;
+    ]?.join(', ')}`;
   });
-
   return questionsPlusAnswers.join('\n\n');
 }
 
@@ -76,12 +75,25 @@ export function generateAIPrompt({
 export function parsePokemonFromAiResponse(
   aiResponse: string
 ): MatchedPokemonType | undefined {
-  const match = aiResponse.match(/{[\s\S]*}/);
-  if (!match) throw new Error('No JSON found in the AI response');
   try {
+    const match = aiResponse.match(/{[\s\S]*}/);
+    if (!match) throw new Error('No JSON found in the AI response');
     const matchedPokemon = JSON.parse(match[0]);
-    return matchedPokemon;
+    if (
+      !matchedPokemon.name ||
+      !matchedPokemon.types ||
+      !matchedPokemon.image ||
+      !matchedPokemon.justification
+    ) {
+      throw new Error('Invalid JSON format');
+    }
+
+    return {
+      ...matchedPokemon,
+      image: `${process.env.NEXT_PUBLIC_POKEMON_IMAGE_BASE_URL}/${matchedPokemon.name}.jpg`,
+    };
   } catch (error) {
     console.error(error);
+    throw error;
   }
 }
