@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useContext } from 'react';
+import { QuizContext, QuizDispatchContext } from '@/context/quiz-context';
 
 import { type QuestionType } from '@/types/question';
 
@@ -13,23 +15,24 @@ import PokeBallIcon from '@/components/ui/pokeball-icon';
 
 interface QuizFormPropsInterface {
   questions: QuestionType[];
-  onSubmit: (answers: Record<number, string[]>) => Promise<void>;
+  onSubmit: () => Promise<void>;
 }
 
 export default function QuizForm({
   questions,
   onSubmit,
 }: QuizFormPropsInterface) {
-  const [step, setStep] = useState(1);
-  const [error, setError] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<Record<number, string[]>>({});
+  const quizState = useContext(QuizContext);
+  const dispatch = useContext(QuizDispatchContext);
 
-  const currentQuestion = questions[step - 1];
-  const currentAnswer = answers[step] || [];
+  const [localeError, setLocaleError] = useState<string | null>(null);
+
+  const currentQuestion = questions[quizState.step - 1];
+  const currentAnswer = quizState.answers[quizState.step] || [];
 
   const handleAnswerChange = (answer: string[]) => {
-    setError(null);
-    setAnswers({ ...answers, [step]: answer });
+    setLocaleError(null);
+    dispatch({ type: 'SET_ANSWERS', payload: answer });
   };
 
   const isCurrentAnswerValid = (): boolean => {
@@ -53,29 +56,36 @@ export default function QuizForm({
   };
 
   const goToPreviousStep = () => {
-    setError(null);
-    setStep(step - 1);
+    setLocaleError(null);
+    dispatch({ type: 'SET_STEP', payload: quizState.step - 1 });
   };
 
-  const goToNextStep = async (event: { preventDefault: () => void }) => {
+  const goToNextStep = (event: { preventDefault: () => void }) => {
     event.preventDefault();
+    setLocaleError(null);
     if (!isCurrentAnswerValid()) {
-      setError('Please complete this step before continuing.');
+      setLocaleError('Please complete this step before continuing.');
       return;
     }
-    setError(null);
-    if (step < questions.length) {
-      setStep(step + 1);
-    } else {
-      console.log(answers);
-      onSubmit(answers);
+    dispatch({ type: 'SET_STEP', payload: quizState.step + 1 });
+  };
+
+  const goToSubmit = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    if (!isCurrentAnswerValid()) {
+      setLocaleError('Please complete this step before continuing.');
+      return;
     }
+    onSubmit();
   };
 
   return (
-    <form onSubmit={goToNextStep} className="w-full h-full flex flex-col">
+    <form
+      onSubmit={quizState.step === questions.length ? goToSubmit : goToNextStep}
+      className="w-full h-full flex flex-col"
+    >
       <CardHeader className="flex justify-center mb-2">
-        <h1>{`Question ${step} / ${questions.length}`}</h1>
+        <h1>{`Question ${quizState.step} / ${questions.length}`}</h1>
       </CardHeader>
 
       <Question
@@ -85,21 +95,27 @@ export default function QuizForm({
       ></Question>
 
       <div className="h-6 mt-1">
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {localeError && <p className="text-sm text-red-500">{localeError}</p>}
       </div>
 
       <CardFooter className="justify-between mt-4">
-        <Button type="button" onClick={goToPreviousStep} disabled={step === 1}>
+        <Button
+          onClick={goToPreviousStep}
+          disabled={quizState.step === 1}
+          type="button"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
         </Button>
-        {step < questions.length ? (
-          <Button onClick={goToNextStep} variant="default">
-            Next <ArrowRight className="h-4 w-4 mr-2" />
+        {quizState.step < questions.length ? (
+          <Button onClick={goToNextStep} type="button">
+            Next
+            <ArrowRight className="h-4 w-4 mr-2" />
           </Button>
         ) : (
-          <Button onClick={goToNextStep} variant="secondary">
-            Submit <PokeBallIcon />
+          <Button onClick={goToSubmit} variant="secondary" type="submit">
+            Submit
+            <PokeBallIcon />
           </Button>
         )}
       </CardFooter>

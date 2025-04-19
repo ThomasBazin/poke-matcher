@@ -1,77 +1,54 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useContext } from 'react';
+import { QuizContext, QuizDispatchContext } from '@/context/quiz-context';
 
 import { questions } from '@/data/questions';
-
-import { type MatchedPokemonType } from '@/types/matched-pokemon';
-import { type AnswersType } from '@/types/answers';
 
 import QuizForm from '@/components/quiz-form';
 import QuizResult from '@/components/quiz-result';
 import ErrorMessage from '@/components/error-message';
 import Loader from '@/components/loader';
 
-import { getPokemons } from '@/api/pokemons-api';
-import { getAIResponse } from '@/api/ai-api';
-
-import {
-  formatAnswersForPrompt,
-  formatPokemonsForPrompt,
-  generateAIPrompt,
-  parsePokemonFromAiResponse,
-} from '@/utils/prompt-utils';
+import { submitForm } from '../actions';
 
 export default function QuizPage() {
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-
-  const matchedPokemon = useRef<MatchedPokemonType | undefined>(undefined);
-
   const questionsData = questions;
 
-  const submitForm = async (answers: AnswersType) => {
+  const quizState = useContext(QuizContext);
+  const dispatch = useContext(QuizDispatchContext);
+
+  const handleSubmitForm = async () => {
     try {
-      setLoading(true);
-      setIsFormSubmitted(true);
-      const formattedAnswers = formatAnswersForPrompt({ questions, answers });
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_FORM_SUBMITTED', payload: true });
 
-      const pokemons = await getPokemons();
+      const matchedPokemon = await submitForm(quizState.answers);
 
-      if (!pokemons) {
-        return setError('An error occured, please try again later.');
-      }
-
-      const prompt = generateAIPrompt({
-        userAnswers: formattedAnswers,
-        pokemonsInfos: formatPokemonsForPrompt(pokemons),
-      });
-
-      const aiResponse = await getAIResponse(prompt);
-      if (!aiResponse) {
-        return setError('An error occured, please try again later.');
-      }
-      const parsedPokemon = parsePokemonFromAiResponse(aiResponse);
-      matchedPokemon.current = parsedPokemon;
+      dispatch({ type: 'SET_MATCHED_POKEMON', payload: matchedPokemon });
     } catch (error) {
       console.error(error);
-      setError('An error occured, please try again later.');
+
+      return dispatch({
+        type: 'SET_ERROR',
+        payload: 'An error occured, please try again later.',
+      });
     } finally {
-      setLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
-  if (error) return <ErrorMessage message={error}></ErrorMessage>;
+  if (quizState.error)
+    return <ErrorMessage message={quizState.error}></ErrorMessage>;
 
-  if (loading)
+  if (quizState.loading)
     return <Loader message="This might take a few minutes."></Loader>;
 
-  return !isFormSubmitted ? (
-    <QuizForm questions={questionsData} onSubmit={submitForm}></QuizForm>
+  return !quizState.isFormSubmitted ? (
+    <QuizForm questions={questionsData} onSubmit={handleSubmitForm}></QuizForm>
   ) : (
-    matchedPokemon.current && (
-      <QuizResult matchedPokemon={matchedPokemon.current}></QuizResult>
+    quizState.matchedPokemon && (
+      <QuizResult matchedPokemon={quizState.matchedPokemon}></QuizResult>
     )
   );
 }
