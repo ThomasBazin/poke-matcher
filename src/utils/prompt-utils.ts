@@ -12,7 +12,7 @@ export function formatAnswersForPrompt({
   const questionsPlusAnswers = questions.map((question, index) => {
     return `Question ${index + 1} : ${question.label}\nAnswer: ${answers[
       index + 1
-    ].join(', ')}`;
+    ]?.join(', ')}`;
   });
   return questionsPlusAnswers.join('\n\n');
 }
@@ -79,7 +79,19 @@ export function parsePokemonFromAiResponse(
     const match = aiResponse.match(/{[\s\S]*}/);
     if (!match) throw new Error('No JSON found in the AI response');
     const matchedPokemon = JSON.parse(match[0]);
-    return matchedPokemon;
+    if (
+      !matchedPokemon.name ||
+      !matchedPokemon.types ||
+      !matchedPokemon.image ||
+      !matchedPokemon.justification
+    ) {
+      throw new Error('Invalid JSON format');
+    }
+
+    return {
+      ...matchedPokemon,
+      image: `${process.env.NEXT_PUBLIC_POKEMON_IMAGE_BASE_URL}/${matchedPokemon.name}.jpg`,
+    };
   } catch (error) {
     console.error(error);
     throw error;
