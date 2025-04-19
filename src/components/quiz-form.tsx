@@ -8,7 +8,6 @@ import { type QuestionType } from '@/types/question';
 
 import Question from '@/components/question';
 
-import { CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PokeBallIcon from '@/components/ui/pokeball-icon';
@@ -84,9 +83,9 @@ export default function QuizForm({
       onSubmit={quizState.step === questions.length ? goToSubmit : goToNextStep}
       className="w-full h-full flex flex-col"
     >
-      <CardHeader className="flex justify-center mb-2">
+      <div className="flex justify-center mb-2">
         <h1>{`Question ${quizState.step} / ${questions.length}`}</h1>
-      </CardHeader>
+      </div>
 
       <Question
         question={currentQuestion}
@@ -98,27 +97,37 @@ export default function QuizForm({
         {localeError && <p className="text-sm text-red-500">{localeError}</p>}
       </div>
 
-      <CardFooter className="justify-between mt-4">
+      <div className="justify-between mt-4 flex flex-wrap gap-2 sm:flex-row">
         <Button
           onClick={goToPreviousStep}
           disabled={quizState.step === 1}
           type="button"
+          className="flex-1 max-w-fit"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
         </Button>
         {quizState.step < questions.length ? (
-          <Button onClick={goToNextStep} type="button">
+          <Button
+            onClick={goToNextStep}
+            type="button"
+            className="flex-1 max-w-fit"
+          >
             Next
-            <ArrowRight className="h-4 w-4 mr-2" />
+            <ArrowRight className="h-4 w-4 mr-2 " />
           </Button>
         ) : (
-          <Button onClick={goToSubmit} variant="secondary" type="submit">
+          <Button
+            onClick={goToSubmit}
+            variant="secondary"
+            type="submit"
+            className="flex-1 max-w-fit"
+          >
             Submit
             <PokeBallIcon />
           </Button>
         )}
-      </CardFooter>
+      </div>
     </form>
   );
 }
