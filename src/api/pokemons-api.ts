@@ -10,7 +10,7 @@ export type PokemonFromApiType = {
 async function getAllPokemons(): Promise<[]> {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_POKE_API_BASE_URL}/pokemon?limit=151`
+      `${process.env.NEXT_PUBLIC_POKE_API_BASE_URL}/pokemon?limit=50`
     );
     return response.data.results;
   } catch (error) {

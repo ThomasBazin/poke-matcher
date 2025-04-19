@@ -75,12 +75,13 @@ export function generateAIPrompt({
 export function parsePokemonFromAiResponse(
   aiResponse: string
 ): MatchedPokemonType | undefined {
-  const match = aiResponse.match(/{[\s\S]*}/);
-  if (!match) throw new Error('No JSON found in the AI response');
   try {
+    const match = aiResponse.match(/{[\s\S]*}/);
+    if (!match) throw new Error('No JSON found in the AI response');
     const matchedPokemon = JSON.parse(match[0]);
     return matchedPokemon;
   } catch (error) {
     console.error(error);
+    throw error;
   }
 }
