@@ -50,7 +50,7 @@ export function generateAIPrompt({
     Take into account the user's temperament, preferences, and lifestyle. Carefully analyze and compare them with each Pokémon's type and description.
     Your picked Pokémon should exist in the list below.
     Analyze all the Pokémons of the database below to make your decision.
-    Justify your choice with 1 sentence maximum: why this Pokémon matches the overall personality. 
+    Justify your choice with 1 sentence maximum: don't point to a particular question, stay generic.
     In your response, name and types should be identical to what is in the database. Image should be the full url as in the database.
     Return your answer in a single JSON object format according to the schema below (properties name, types, image and justification):
 
