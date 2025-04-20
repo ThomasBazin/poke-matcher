@@ -6,14 +6,15 @@ import { QuizContext, QuizDispatchContext } from '@/context/quiz-context';
 import { questions } from '@/data/questions';
 
 import QuizForm from '@/components/quiz-form';
-import QuizResult from '@/components/quiz-result';
 import ErrorMessage from '@/components/error-message';
 import Loader from '@/components/loader';
 
 import { submitForm } from '../actions';
+import { useRouter } from 'next/navigation';
 
 export default function QuizPage() {
   const questionsData = questions;
+  const router = useRouter();
 
   const quizState = useContext(QuizContext);
   const dispatch = useContext(QuizDispatchContext);
@@ -26,6 +27,7 @@ export default function QuizPage() {
       const matchedPokemon = await submitForm(quizState.answers);
 
       dispatch({ type: 'SET_MATCHED_POKEMON', payload: matchedPokemon });
+      router.push('/quiz/result');
     } catch (error) {
       console.error(error);
 
@@ -46,9 +48,5 @@ export default function QuizPage() {
 
   return !quizState.isFormSubmitted ? (
     <QuizForm questions={questionsData} onSubmit={handleSubmitForm}></QuizForm>
-  ) : (
-    quizState.matchedPokemon && (
-      <QuizResult matchedPokemon={quizState.matchedPokemon}></QuizResult>
-    )
-  );
+  ) : null;
 }

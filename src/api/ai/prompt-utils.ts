@@ -1,20 +1,18 @@
-import { type QuestionType } from '@/types/question';
-import { PokemonFromApiType } from '@/api/pokemons-api';
+import { PokemonFromApiType } from '@/api/pokemon/pokemons-api';
 import { type MatchedPokemonType } from '@/types/matched-pokemon';
 
-export function formatAnswersForPrompt({
-  questions,
-  answers,
-}: {
-  questions: QuestionType[];
-  answers: Record<number, string[]>;
-}): string {
-  const questionsPlusAnswers = questions.map((question, index) => {
-    return `Question ${index + 1} : ${question.label}\nAnswer: ${answers[
-      index + 1
-    ]?.join(', ')}`;
-  });
-  return questionsPlusAnswers.join('\n\n');
+export function formatQuizForPrompt(
+  quiz: { id: number; label: string; answers: string[] }[]
+): string {
+  return quiz
+    .map((question) => {
+      return `Question ${question.id} : ${question.label}\nAnswer: ${
+        question.answers.length > 1
+          ? question.answers.join(', ')
+          : question.answers[0]
+      }`;
+    })
+    .join('\n\n');
 }
 
 export function formatPokemonsForPrompt(
@@ -40,27 +38,21 @@ export function formatPokemonsForPrompt(
 }
 
 export function generateAIPrompt({
-  userAnswers,
+  quiz,
   pokemonsInfos,
 }: {
-  userAnswers: string;
+  quiz: string;
   pokemonsInfos: string;
 }): string {
   return `
-    New question : you are a Pokémon expert AI. Based on the user's personality test answers, identify the single most fitting Pokémon from the database below.
+    You are a personality profiler and a Pokémon expert. First, analyze the user's personality based on the quiz below. It contains questions about the user's personality and their answers.
+    Then, analyze the Pokémons list below and figure out which Pokemon best matches the user. Only use this list for reference and no other resource.
     Take into account the user's temperament, preferences, and lifestyle. Carefully analyze and compare them with each Pokémon's type and description.
-    Your picked Pokémon should exist in the database below.
-
-    User's Answers:
-    ${userAnswers}
-
-    Pokémon database:
-    ${pokemonsInfos}
-
-    Which Pokémon best matches this user ? Your choice should be one the Pokémons in the list.
-    Justify your choice with 1 sentence maximum: why this Pokémon matches the overall personality. 
+    Your picked Pokémon should exist in the list below.
+    Analyze all the Pokémons of the database below to make your decision.
+    Justify your choice with 1 sentence maximum: don't point to a particular question, stay generic.
     In your response, name and types should be identical to what is in the database. Image should be the full url as in the database.
-    Return your answer one JSON object format according to the schema below (properties name, types, image and justification):
+    Return your answer in a single JSON object format according to the schema below (properties name, types, image and justification):
 
     {
     "name": "name of the pokemon",
@@ -69,23 +61,32 @@ export function generateAIPrompt({
     "justification": "short explanation of the match"
     }
 
+    -----
+    User's quiz:
+    ${quiz}
+    -----
+    Pokémon database:
+    ${pokemonsInfos}
+    -----
     `;
 }
 
 export function parsePokemonFromAiResponse(
   aiResponse: string
-): MatchedPokemonType | undefined {
+): MatchedPokemonType | null {
   try {
     const match = aiResponse.match(/{[\s\S]*}/);
-    if (!match) throw new Error('No JSON found in the AI response');
+    if (!match) return null;
+
     const matchedPokemon = JSON.parse(match[0]);
+
     if (
       !matchedPokemon.name ||
       !matchedPokemon.types ||
       !matchedPokemon.image ||
       !matchedPokemon.justification
     ) {
-      throw new Error('Invalid JSON format');
+      return null;
     }
 
     return {
@@ -94,6 +95,6 @@ export function parsePokemonFromAiResponse(
     };
   } catch (error) {
     console.error(error);
-    throw error;
+    return null;
   }
 }
