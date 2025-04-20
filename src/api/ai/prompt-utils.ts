@@ -45,8 +45,8 @@ export function generateAIPrompt({
   pokemonsInfos: string;
 }): string {
   return `
-    You are a personnality profiler and a Pokémon expert. First, analyze the user's personality based on the quiz below. It contains questions about the user's personality and their answers.
-    Then, analyze the Pokémons list below and figure out wich Pokemon best matches the user. Only use this list for reference and no other resource.
+    You are a personality profiler and a Pokémon expert. First, analyze the user's personality based on the quiz below. It contains questions about the user's personality and their answers.
+    Then, analyze the Pokémons list below and figure out which Pokemon best matches the user. Only use this list for reference and no other resource.
     Take into account the user's temperament, preferences, and lifestyle. Carefully analyze and compare them with each Pokémon's type and description.
     Your picked Pokémon should exist in the list below.
     Analyze all the Pokémons of the database below to make your decision.
