@@ -45,20 +45,14 @@ export function generateAIPrompt({
   pokemonsInfos: string;
 }): string {
   return `
-    New question : you are a Pokémon expert AI. Based on the user's personality test answers, identify the single most fitting Pokémon from the database below.
+    You are a personnality profiler and a Pokémon expert. First, analyze the user's personality based on the quiz below. It contains questions about the user's personality and their answers.
+    Then, analyze the Pokémons list below and figure out wich Pokemon best matches the user. Only use this list for reference and no other resource.
     Take into account the user's temperament, preferences, and lifestyle. Carefully analyze and compare them with each Pokémon's type and description.
-    Your picked Pokémon should exist in the database below.
-
-    User's Answers:
-    ${quiz}
-
-    Pokémon database:
-    ${pokemonsInfos}
-
-    Which Pokémon best matches this user ? Your choice should be one the Pokémons in the list.
+    Your picked Pokémon should exist in the list below.
+    Analyze all the Pokémons of the database below to make your decision.
     Justify your choice with 1 sentence maximum: why this Pokémon matches the overall personality. 
     In your response, name and types should be identical to what is in the database. Image should be the full url as in the database.
-    Return your answer one JSON object format according to the schema below (properties name, types, image and justification):
+    Return your answer in a single JSON object format according to the schema below (properties name, types, image and justification):
 
     {
     "name": "name of the pokemon",
@@ -67,6 +61,13 @@ export function generateAIPrompt({
     "justification": "short explanation of the match"
     }
 
+    -----
+    User's quiz:
+    ${quiz}
+    -----
+    Pokémon database:
+    ${pokemonsInfos}
+    -----
     `;
 }
 
