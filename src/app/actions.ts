@@ -27,7 +27,7 @@ export async function submitForm(
     });
 
     const matchedPokemon = await getMatchedPokemonFromAI({
-      provider: ollamaProvider,
+      AIProvider: ollamaProvider,
       quiz,
       pokemons,
     });

@@ -11,11 +11,11 @@ import {
 } from './prompt-utils';
 
 export async function getMatchedPokemonFromAI({
-  provider,
+  AIProvider,
   quiz,
   pokemons,
 }: {
-  provider: AIProviderInterface;
+  AIProvider: AIProviderInterface;
   quiz: QuizType;
   pokemons: PokemonFromApiType[];
 }): Promise<MatchedPokemonType> {
@@ -29,7 +29,7 @@ export async function getMatchedPokemonFromAI({
       pokemonsInfos: stringifiedPokemons,
     });
 
-    const aiResponse = await provider.POST(prompt);
+    const aiResponse = await AIProvider.POST(prompt);
 
     const parsedPokemon = parsePokemonFromAiResponse(aiResponse);
     if (!parsedPokemon) {
