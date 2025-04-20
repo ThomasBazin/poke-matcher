@@ -11,6 +11,7 @@ services:
       - ollama
     environment:
       - NODE_ENV=production
+      - OLLAMA_BASE_URL=http://ollama:11434/api
 
   ollama:
     build:
