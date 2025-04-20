@@ -10,7 +10,7 @@ export type PokemonFromApiType = {
 async function getAllPokemons(): Promise<[]> {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_POKE_API_BASE_URL}/pokemon?limit=50`
+      `${process.env.POKE_API_BASE_URL}/pokemon?limit=50`
     );
     return response.data.results;
   } catch (error) {
@@ -24,7 +24,7 @@ async function getOnePokemon(
 ): Promise<{ types: { type: { name: string } }[] }> {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_POKE_API_BASE_URL}/pokemon/${name}`
+      `${process.env.POKE_API_BASE_URL}/pokemon/${name}`
     );
     return response.data;
   } catch (error) {
@@ -33,35 +33,10 @@ async function getOnePokemon(
   }
 }
 
-// async function getPokemonDescriptionv1(name: string): Promise<string> {
-//   try {
-//     const response = await axios.get(
-//       `https://pokeapi.co/api/v2/pokemon-species/${name}`
-//     );
-//     const descriptionsArray = response.data.flavor_text_entries.filter(
-//       (element: {
-//         flavor_text: string;
-//         language: { name: string; url: string };
-//       }) => element.language.name === 'en'
-//     );
-
-//     return [
-//       ...new Set(
-//         descriptionsArray.map((description: { flavor_text: string }) => {
-//           return description.flavor_text.replace(/[\n\f]/g, ' ');
-//         })
-//       ),
-//     ].join(' ');
-//   } catch (error) {
-//     console.error(error);
-//     throw error;
-//   }
-// }
-
 async function getPokemonDescription(name: string): Promise<string> {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_POKE_API_BASE_URL}/pokemon-species/${name}`
+      `${process.env.POKE_API_BASE_URL}/pokemon-species/${name}`
     );
     const description = response.data.flavor_text_entries.find(
       (element: {

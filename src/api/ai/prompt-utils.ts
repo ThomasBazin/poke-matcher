@@ -1,20 +1,18 @@
-import { type QuestionType } from '@/types/question';
-import { PokemonFromApiType } from '@/api/pokemons-api';
+import { PokemonFromApiType } from '@/api/pokemon/pokemons-api';
 import { type MatchedPokemonType } from '@/types/matched-pokemon';
 
-export function formatAnswersForPrompt({
-  questions,
-  answers,
-}: {
-  questions: QuestionType[];
-  answers: Record<number, string[]>;
-}): string {
-  const questionsPlusAnswers = questions.map((question, index) => {
-    return `Question ${index + 1} : ${question.label}\nAnswer: ${answers[
-      index + 1
-    ]?.join(', ')}`;
-  });
-  return questionsPlusAnswers.join('\n\n');
+export function formatQuizForPrompt(
+  quiz: { id: number; label: string; answers: string[] }[]
+): string {
+  return quiz
+    .map((question) => {
+      return `Question ${question.id} : ${question.label}\nAnswer: ${
+        question.answers.length > 1
+          ? question.answers.join(', ')
+          : question.answers[0]
+      }`;
+    })
+    .join('\n\n');
 }
 
 export function formatPokemonsForPrompt(
@@ -40,10 +38,10 @@ export function formatPokemonsForPrompt(
 }
 
 export function generateAIPrompt({
-  userAnswers,
+  quiz,
   pokemonsInfos,
 }: {
-  userAnswers: string;
+  quiz: string;
   pokemonsInfos: string;
 }): string {
   return `
@@ -52,7 +50,7 @@ export function generateAIPrompt({
     Your picked Pokémon should exist in the database below.
 
     User's Answers:
-    ${userAnswers}
+    ${quiz}
 
     Pokémon database:
     ${pokemonsInfos}
@@ -74,18 +72,20 @@ export function generateAIPrompt({
 
 export function parsePokemonFromAiResponse(
   aiResponse: string
-): MatchedPokemonType | undefined {
+): MatchedPokemonType | null {
   try {
     const match = aiResponse.match(/{[\s\S]*}/);
-    if (!match) throw new Error('No JSON found in the AI response');
+    if (!match) return null;
+
     const matchedPokemon = JSON.parse(match[0]);
+
     if (
       !matchedPokemon.name ||
       !matchedPokemon.types ||
       !matchedPokemon.image ||
       !matchedPokemon.justification
     ) {
-      throw new Error('Invalid JSON format');
+      return null;
     }
 
     return {
@@ -94,6 +94,6 @@ export function parsePokemonFromAiResponse(
     };
   } catch (error) {
     console.error(error);
-    throw error;
+    return null;
   }
 }
