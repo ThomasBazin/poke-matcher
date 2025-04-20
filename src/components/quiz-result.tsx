@@ -17,8 +17,8 @@ export default function QuizResult({
         fallbackSrc="/pokeball-icon-10.jpg"
         alt=""
         className="w-30 h-30 object-contain"
-        width={40}
-        height={40}
+        width={100}
+        height={100}
       />
       <h2 className="text-xl font-bold text-secondary capitalize">
         {matchedPokemon.name}
