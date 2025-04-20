@@ -24,7 +24,7 @@ export default function QuizResult({
         {matchedPokemon.name}
       </h2>
 
-      <div className="flex-1 flex flex-col items-center justify-between gap-3 overflow-y-scroll">
+      <div className="w-full flex-1 flex flex-col items-center justify-between gap-3 overflow-y-scroll">
         <p className="px-4 text-muted-foreground text-sm text-pretty">
           {matchedPokemon.justification}
         </p>

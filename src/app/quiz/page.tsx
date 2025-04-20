@@ -46,7 +46,7 @@ export default function QuizPage() {
   if (quizState.loading)
     return <Loader message="This might take a few minutes."></Loader>;
 
-  return (
+  return !quizState.isFormSubmitted ? (
     <QuizForm questions={questionsData} onSubmit={handleSubmitForm}></QuizForm>
-  );
+  ) : null;
 }
