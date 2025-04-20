@@ -15,45 +15,43 @@ export default function QuestionCheckbox({
   onChange,
 }: QuestionCheckboxPropsInterface) {
   return (
-    <>
-      <div className="flex-1">
-        <fieldset>
-          <legend className="block text-xl font-semibold mb-4 text-pretty">
-            {question.label}
-          </legend>
-          <div className="flex flex-col gap-1.5 mb-3">
-            {question.max && (
-              <p className="text-xs text-red-500 mt-1">
-                Select up to {question.max}
-              </p>
-            )}
-            {question.options.map((option) => {
-              const selected = prefilledAnswer || [];
+    <div className="flex flex-col h-full overflow-y-auto">
+      <fieldset className="flex-1 flex flex-col h-full">
+        <legend className="block text-xl font-semibold mb-1 text-pretty">
+          {question.label}
+        </legend>
+        {question.max && (
+          <p className="text-xs text-red-500 mt-2 mb-4">
+            Select up to {question.max}
+          </p>
+        )}
+        <div className="flex-1 overflow-y-auto flex flex-col gap-2">
+          {question.options.map((option) => {
+            const selected = prefilledAnswer || [];
 
-              const isOptionDisabled = () => {
-                if (!question.max) return false;
-                return (
-                  !selected.includes(option) && question.max <= selected.length
-                );
-              };
-
+            const isOptionDisabled = () => {
+              if (!question.max) return false;
               return (
-                <div key={option} className="flex items-center gap-2">
-                  <Checkbox
-                    id={option}
-                    checked={selected.includes(option)}
-                    onCheckedChange={() => onChange(option)}
-                    disabled={isOptionDisabled()}
-                  />
-                  <Label htmlFor={option} className="text-sm font-medium">
-                    {option}
-                  </Label>
-                </div>
+                !selected.includes(option) && question.max <= selected.length
               );
-            })}
-          </div>
-        </fieldset>
-      </div>
-    </>
+            };
+
+            return (
+              <div key={option} className="flex items-center gap-2">
+                <Checkbox
+                  id={option}
+                  checked={selected.includes(option)}
+                  onCheckedChange={() => onChange(option)}
+                  disabled={isOptionDisabled()}
+                />
+                <Label htmlFor={option} className="font-medium">
+                  {option}
+                </Label>
+              </div>
+            );
+          })}
+        </div>
+      </fieldset>
+    </div>
   );
 }

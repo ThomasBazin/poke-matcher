@@ -15,28 +15,26 @@ export default function QuestionRadio({
   onChange,
 }: QuestionRadioPropsInterface) {
   return (
-    <>
-      <div className="flex-1 overflow-y-auto">
-        <fieldset>
-          <legend className="block text-xl font-semibold mb-4 md:mb-8">
-            {question.label}
-          </legend>
-          <RadioGroup
-            value={(prefilledAnswer.length && prefilledAnswer[0]) || ''}
-            onValueChange={onChange}
-            className="gap-y-5 mb-6"
-          >
-            {question.options.map((option) => (
-              <div key={option} className="flex items-center gap-2">
-                <RadioGroupItem value={option} id={option} />
-                <Label htmlFor={option} className="text-sm font-medium">
-                  {option}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </fieldset>
-      </div>
-    </>
+    <div className="flex-1 overflow-y-auto">
+      <fieldset>
+        <legend className="block text-xl font-semibold mb-4 md:mb-8">
+          {question.label}
+        </legend>
+        <RadioGroup
+          value={(prefilledAnswer.length && prefilledAnswer[0]) || ''}
+          onValueChange={onChange}
+          className="gap-y-5 mb-6"
+        >
+          {question.options.map((option) => (
+            <div key={option} className="flex items-center gap-2">
+              <RadioGroupItem value={option} id={option} />
+              <Label htmlFor={option} className="text-sm font-medium">
+                {option}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </fieldset>
+    </div>
   );
 }

@@ -28,9 +28,8 @@ export default function Question({
         updatedAnswer = [...answer].filter((answer) => answer !== value);
       }
       if (
-        !answer.includes(value) &&
-        questionMaxAnswers &&
-        answer.length < questionMaxAnswers
+        !answer.includes(value) ||
+        (questionMaxAnswers && answer.length < questionMaxAnswers)
       ) {
         updatedAnswer = [...answer, value];
       }
